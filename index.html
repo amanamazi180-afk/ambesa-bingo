@@ -1,0 +1,142 @@
+<!doctype html><html lang="am"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>አንበሳ Bingo</title><meta name="theme-color" content="#0c0805">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{--bg:#0c0805;--cd:#17100a;--ln:#3b2a17;--gd:#f2b632;--cr:#c1121f;--am:#f97316;--gr:#2dbe6c;--tx:#fbf3e4;--mu:#b39b7a}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}html,body{height:100%}
+body{font:15px system-ui,"Noto Sans Ethiopic",sans-serif;background:radial-gradient(#1d120a,var(--bg));color:var(--tx);overflow:hidden}
+.s{display:none;position:fixed;inset:0;flex-direction:column;gap:8px;padding:10px 10px calc(env(safe-area-inset-bottom,0px) + 84px);overflow-y:auto}.s.on{display:flex}
+#game{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 8px);gap:6px}
+.logo{font:900 13vw/1 system-ui;text-align:center;background:linear-gradient(90deg,#ffe08a,#f2b632,#f97316);-webkit-background-clip:text;color:transparent}.logo i{font-style:normal;background:linear-gradient(90deg,#fb7185,#c1121f);-webkit-background-clip:text;color:transparent}
+.gb{border:1px solid var(--ln);background:var(--cd);color:var(--tx);border-radius:12px;padding:10px 13px;font-weight:700;font-size:14px}.gb.g{background:var(--gd);color:#241500;border-color:var(--gd)}.gb.r{background:var(--cr);border-color:var(--cr)}
+.row{display:flex;gap:6px;align-items:stretch}.pill{flex:1;background:var(--cd);border:1px solid var(--ln);border-radius:12px;padding:5px 3px;text-align:center}.pill small{display:block;font-size:10px;color:var(--mu);font-weight:700}.pill b{font-size:17px}.pill.t b{color:var(--gd);font-size:22px}
+.dr{flex:1;background:linear-gradient(135deg,#ffe28a,#f2b632 55%,#d98e0a);color:#2a1700;border-radius:14px;text-align:center;padding:3px 6px;box-shadow:0 2px 14px #f2b63266}.dr small{font-size:11px;font-weight:800;color:#6b4300;display:block}.dr b{font-size:26px}
+.hint{font-size:12px;color:var(--mu);text-align:center}.mid{flex:1;display:flex;flex-direction:column;justify-content:center;gap:12px;text-align:center}
+.play{border:0;border-radius:18px;background:linear-gradient(#e11d48,#9b0f23);color:#fff;font-size:24px;font-weight:900;padding:18px;box-shadow:0 0 0 2px var(--gd) inset,0 8px 24px #c1121f55}
+.lionsk{width:min(80vw,310px);height:auto;aspect-ratio:640/661;object-fit:contain;margin:0 auto;display:block;-webkit-mask-image:radial-gradient(closest-side,#000 74%,transparent 100%);mask-image:radial-gradient(closest-side,#000 74%,transparent 100%)}.bal{font-size:34px;font-weight:900;color:var(--gd)}
+.grid{flex:1;min-height:120px;overflow-y:auto;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:6px;align-content:start;background:#120c07;border:1px solid var(--ln);border-radius:16px;padding:8px}
+.n{background:#241810;border:1.5px solid #4a3620;border-radius:9px;height:38px;display:flex;align-items:center;justify-content:center;font-weight:700}.n.mine{background:var(--gr);border-color:var(--gr);color:#04170c}.n.tk{background:#6b1018;border-color:#c1121f;color:#fff}.n.bn{background:var(--gd);color:#241500}
+.bnr{display:none;text-align:center;font-size:12px;font-weight:800;color:var(--gd);border:1px solid var(--gd);border-radius:10px;padding:5px}
+.card{display:grid;grid-template-columns:repeat(5,1fr);gap:4px}.card .h{border-radius:6px;font-weight:800;text-align:center;padding:3px 0;font-size:12px;color:#fff}
+.card .c{background:#fbf3e4;color:#2a1700;border-radius:7px;aspect-ratio:1.2;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:17px}.card .c.m{background:var(--cr);color:#fff}.card .c.l{outline:3px solid var(--gd)}.card .c.w{background:var(--gd);color:#2a1700}
+.prev{display:grid;grid-template-columns:1fr 1fr;gap:8px}.prev:empty{display:none}.cn{text-align:center;color:var(--gd);font-weight:800;font-size:12px;margin-bottom:3px}
+.mc{background:var(--cd);border:1px solid var(--ln);border-radius:16px;padding:8px}
+/* GAME: board is 5 wide rows on top, ball + calls strip under it, cards at the bottom */
+.board{display:grid;grid-template-columns:20px repeat(15,1fr);gap:2px;background:var(--cd);border:1px solid var(--ln);border-radius:14px;padding:5px;flex:none}
+.board .hd{display:flex;align-items:center;justify-content:center;font-weight:900;font-size:15px;color:#fff;border-radius:5px}
+.nn{display:flex;align-items:center;justify-content:center;border-radius:5px;background:#241810;border:1px solid #3d2c19;font-size:clamp(8px,2.7vw,12px);font-weight:700;height:clamp(20px,6.4vw,28px);color:#9c8567}
+.nn.k{background:linear-gradient(#f97316,#c2410c);border-color:#fdba74;color:#fff;font-weight:900}.nn.l{background:linear-gradient(#ffe28a,#f2b632);color:#241500;box-shadow:0 0 0 2px #fff,0 0 10px #f2b632;font-weight:900}
+.strip{display:grid;grid-template-columns:auto 1fr;gap:6px;flex:none}
+.box{background:var(--cd);border:1px solid var(--ln);border-radius:16px}
+.bigbox{grid-row:1/3;display:flex;align-items:center;justify-content:center;padding:6px;overflow:hidden}
+.bigb{width:clamp(96px,30vw,132px);height:clamp(96px,30vw,132px);border-radius:50%;background:radial-gradient(circle at 32% 28%,#ffe98a,#f2b632 55%,#8a5a00);color:#241500;border:6px solid #fff;display:flex;align-items:center;justify-content:center;font-size:clamp(24px,8vw,34px);font-weight:900;box-shadow:0 6px 14px #0008}
+.bigb.new{animation:roll .65s cubic-bezier(.22,.7,.3,1)}@keyframes roll{0%{transform:translateX(160%) rotate(900deg);opacity:.2}60%{transform:translateX(-8%) rotate(-30deg);opacity:1}100%{transform:none}}
+.recent{display:flex;align-items:center;justify-content:space-between;padding:5px 8px}.rec{display:flex;gap:6px}.rec span{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;color:#fff}
+.spk{background:none;border:0;font-size:22px;color:var(--tx)}
+.auto{display:flex;align-items:center;justify-content:space-between;padding:6px 10px;font-weight:800;font-size:12px}.sw{width:38px;height:22px;border-radius:11px;background:var(--gr);position:relative}.sw:after{content:"";position:absolute;right:3px;top:3px;width:16px;height:16px;border-radius:50%;background:#fff}.sw.off{background:#4a3620}.sw.off:after{right:auto;left:3px}
+.cardsbox{flex:1;min-height:0;overflow-y:auto;padding:6px}.cardsbox .mc{margin-bottom:6px}
+.bar2{display:flex;gap:6px;flex:none}.bar2 .gb{flex:1}.bar2 .gb:first-child{flex:.5}
+.gnav{position:fixed;left:10px;right:10px;bottom:calc(env(safe-area-inset-bottom,0px) + 8px);display:flex;background:#1a110a;border:1px solid var(--ln);border-radius:26px;padding:5px;z-index:5}
+.gnav div{flex:1;text-align:center;padding:9px 0;border-radius:20px;font-size:12px;font-weight:700;color:var(--mu)}.gnav div.on{background:#3b2a17;color:var(--gd)}
+.ov{position:fixed;inset:0;background:#0c0805f2;display:none;flex-direction:column;align-items:center;justify-content:center;z-index:9;padding:20px;text-align:center}.ov.on{display:flex}
+.bgw{font:900 clamp(56px,20vw,96px)/1 system-ui;background:linear-gradient(90deg,#fb7185,#f97316,#f2b632);-webkit-background-clip:text;color:transparent}.ov.on .bgw{animation:pp 1s infinite alternate}@keyframes pp{to{transform:scale(1.08)}}
+.li{display:flex;justify-content:space-between;background:var(--cd);border:1px solid var(--ln);border-radius:12px;padding:10px 12px;font-weight:700}
+.inp{width:100%;padding:13px;border-radius:12px;border:1px solid var(--ln);background:var(--cd);color:var(--tx);font-size:16px}
+.mth{display:flex;align-items:center;gap:12px;background:var(--cd);border:2px solid var(--ln);border-radius:14px;padding:11px 13px}.mth.on{border-color:var(--gd)}.mth b{color:var(--gd)}.mth span{font-size:20px;font-weight:800}.mth small{color:var(--mu);display:block}.mth i{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-style:normal;font-weight:900;color:#fff}
+.toast{position:fixed;left:50%;top:10%;transform:translateX(-50%);background:var(--cr);color:#fff;font-weight:800;padding:12px 18px;border-radius:14px;z-index:20;display:none;max-width:90vw;text-align:center}
+.rk{display:flex;gap:10px;align-items:center;background:var(--cd);border:1px solid var(--ln);border-radius:12px;padding:9px 11px}.rk .no{width:32px;height:32px;border-radius:9px;background:#3b2a17;color:var(--gd);display:flex;align-items:center;justify-content:center;font-weight:900}.rk .in{flex:1;min-width:0}.rk small{color:var(--mu)}
+</style></head><body>
+<div class="toast" id="toast"></div>
+<div class="s on" id="home"><div class="mid"><div class="logo" style="font-size:11vw">አንበሳ <i>Bingo</i></div><p class="hint">ዋጋ <b id="hs">10</b> ብር · እስከ 2 ካርቴላ ይምረጡ</p><div><small class="hint">የቦርሳ ሒሳብ</small><div class="bal" id="hw">…</div></div><p id="hreg" style="color:var(--gd);font-weight:700"></p></div><button class="play" onclick="play()">▶ ተጫወት</button></div>
+<div class="s" id="lobby"><div class="bnr" id="bnr"></div>
+<div class="row"><button class="gb" onclick="backHome()">← ተመለስ</button><div class="dr"><small>ደራሽ</small><b id="lder">0</b> ብር</div><button class="gb" onclick="key='';tick()">⟳ አድስ</button></div>
+<div class="row"><div class="pill"><small>ዋና ቦርሳ</small><b id="lm">0</b></div><div class="pill"><small>ቦነስ</small><b id="lp">0</b></div><div class="pill"><small>ዋጋ</small><b id="ls">10</b></div><div class="pill"><small>ካርቴላ</small><b id="lpl">0</b></div><div class="pill t"><b id="lt">-</b></div></div>
+<p class="hint">ቁጥር ይንኩ (እስከ 2) · <span style="color:#2dbe6c">አረንጓዴ</span> የእርስዎ · <span style="color:#fb7185">ቀይ</span> የተያዘ · <span style="color:#f2b632">ወርቃማ</span> ቦነስ</p>
+<div class="grid" id="grid"></div><div class="prev" id="prev"></div></div>
+<div class="s" id="game">
+<div class="row"><div class="pill"><small>ዙር</small><b id="gid">-</b></div><div class="pill"><small>ካርቴላ</small><b id="gp">0</b></div><div class="pill"><small>ዋጋ</small><b id="gbet">10</b></div><div class="pill"><small>ደራሽ</small><b id="gd">0</b></div><div class="pill"><small>ጥሪ</small><b id="gc">0</b></div></div>
+<div class="board" id="board"></div>
+<div class="strip"><div class="box bigbox"><div class="bigb" id="big">—</div></div><div class="box recent"><div class="rec" id="rec"></div><button class="spk" id="sb" onclick="togSnd()">🔊</button></div><div class="box auto" onclick="toggleAuto()">አውቶማቲክ <div class="sw" id="sw"></div></div></div>
+<div class="box cardsbox" id="mycards"></div>
+<div class="bar2"><button class="gb r" onclick="leaveGame()">ውጣ</button><button class="gb" id="act" onclick="claim()" disabled>እየተመለከቱ ነው</button></div></div>
+<div class="s" id="tab"><div id="tabc" style="display:flex;flex-direction:column;gap:8px"></div></div>
+<div class="gnav" id="gnav"><div class="on" onclick="tabTo(0)">🦁 ጨዋታ</div><div onclick="tabTo(1)">🏆 ደረጃ</div><div onclick="tabTo(2)">💰 ቦርሳ</div></div>
+<div class="ov" id="win"><div style="font-size:54px">👑</div><div class="bgw" id="wb2">ቢንጎ!</div><h1 id="wt" style="font-size:28px;color:var(--gd)"></h1><p id="wn" style="margin:8px 0 14px;font-size:18px"></p><div id="wc" style="width:100%;max-width:320px"></div><p class="hint" id="ws" style="margin-top:12px"></p></div>
+<script>
+/* ===== ONLY THING TO EDIT: your Worker address ===== */
+const API=(new URLSearchParams(location.search).get("api")||"https://YOUR-WORKER.workers.dev").replace(/\/$/,"");
+/* ==================================================== */
+if(API.indexOf("YOUR-")<0){const l=document.createElement("link");l.rel="preconnect";l.href=API;document.head.appendChild(l)}
+if("serviceWorker" in navigator)addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
+const tg=window.Telegram&&Telegram.WebApp;if(tg){tg.ready();tg.expand();try{tg.setHeaderColor("#0c0805");tg.setBackgroundColor("#0c0805")}catch(e){}}
+const $=i=>document.getElementById(i),CL=["#e11d48","#f97316","#d99a00","#2dbe6c","#0ea5e9"],CARDS=400,HOLDER="kidus";
+const BANKS={cbe:["CBE","1000734517023","#7b2a7e"],telebirr:["Telebirr","0900060528","#0a8fd8"],boa:["BOA","243456916","#b8901f"]};
+const WD={cbe:"CBE",telebirr:"Telebirr",boa:"BOA",mpesa:"M-Pesa",ebirr:"E-birr",dashen:"Dashen",oromia:"Oromia",awash:"Awash"};
+const ERR={not_registered:"መጀመሪያ በቦቱ ይመዝገቡ (ስልክ ቁጥርዎን ያጋሩ)",insufficient_balance:"በቂ ሒሳብ የለዎትም - ገቢ ያድርጉ",round_closed:"ዙሩ ጀምሯል",max_cards:"ከ2 ካርቴላ በላይ አይቻልም",taken:"ካርቴላው ተይዟል",bad_input:"ያስገቡትን ያረጋግጡ",too_many_pending:"ብዙ ያልተረጋገጡ ጥያቄዎች አሉ",txid_used:"ይህ የግብይት ቁጥር ተጠቅሟል",deposit_required:"ከማውጣትዎ በፊት ገቢ ያድርጉ",unauthorized:"ጨዋታውን ከቴሌግራም ቦት ይክፈቱ",server_error:"የሰርቨር ችግር፣ እንደገና ይሞክሩ",banned:"አካውንትዎ ታግዷል",paused:"ጨዋታው ቆሟል",locked:"🔒 ይህ ዙር ተቆልፏል",no_bingo:"❌ ገና ቢንጎ የለም",round_over:"ዙሩ አብቅቷል"};
+let S=null,off=0,inGame=false,looping=false,reg=false,pend=0,rid=0,lastN=0,key="",gkey="",SH=new Set(),snd=true,touched=false,q=[],busy=false,wonId=0,endT={id:0,t:0};
+const F=n=>String(+Number(n).toFixed(2)),Lt=n=>"BINGO"[Math.floor((n-1)/15)],sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let _t;function toast(m,ok){const t=$("toast");t.textContent=m;t.style.background=ok?"var(--gr)":"var(--cr)";t.style.display="block";clearTimeout(_t);_t=setTimeout(()=>t.style.display="none",2800)}
+function show(id){document.querySelectorAll(".s").forEach(e=>e.classList.remove("on"));$(id).classList.add("on");$("gnav").style.display=id==="game"?"none":"flex";if(id!=="game")stopVoice()}
+function initData(){let d=tg&&tg.initData||"";if(!d){try{d=new URLSearchParams(location.hash.slice(1)).get("tgWebAppData")||""}catch(e){}}return d}
+async function api(p,b){if(API.indexOf("YOUR-")>=0)throw"no_api";const tries=b?1:3;for(let a=0;a<tries;a++){const c=new AbortController(),to=setTimeout(()=>c.abort(),10000);try{const r=await fetch(API+p,{method:b?"POST":"GET",headers:{"content-type":"application/json","x-init-data":initData()},body:b?JSON.stringify(b):undefined,signal:c.signal}),d=await r.json().catch(()=>({}));if(!r.ok)throw d.error||"server_error";return d}catch(e){const er=typeof e==="string"?e:"server_error";if(er==="server_error"&&a<tries-1){await sleep(600*(a+1));continue}throw er}finally{clearTimeout(to)}}}
+/* cards: same generator as the server */
+function mk(no){let s=no*7919+13;const r=()=>(s=(s*1664525+1013904223)%4294967296)/4294967296,cols=[];for(let c=0;c<5;c++){const p=Array.from({length:15},(_,i)=>c*15+i+1),o=[];for(let i=0;i<5;i++)o.push(p.splice(Math.floor(r()*p.length),1)[0]);cols.push(o)}cols[2][2]=0;return cols}
+function winLine(c,cl){const m=(a,b)=>c[a][b]===0||cl.includes(c[a][b]),ls=[];for(let i=0;i<5;i++){ls.push([0,1,2,3,4].map(j=>[j,i]));ls.push([0,1,2,3,4].map(j=>[i,j]))}ls.push([0,1,2,3,4].map(j=>[j,j]));ls.push([0,1,2,3,4].map(j=>[j,4-j]));ls.push([[0,0],[4,0],[0,4],[4,4]]);return ls.find(l=>l.every(([a,b])=>m(a,b)))||null}
+function cardHTML(no,cl,hl,last){const c=mk(no);let h='<div class="card">'+[..."BINGO"].map((l,i)=>`<div class="h" style="background:${CL[i]}">${l}</div>`).join("");for(let r=0;r<5;r++)for(let k=0;k<5;k++){const v=c[k][r],m=v===0||cl.includes(v),w=hl&&hl.some(x=>x[0]===k&&x[1]===r);h+=`<div class="c${w?" w":m?" m":""}${v&&v===last?" l":""}">${v===0?"★":v}</div>`}return h+"</div>"}
+/* voice: every call is spoken in order; the number appears on screen when its voice starts */
+function stopVoice(){q=[];busy=false}
+function reveal(n){if(SH.has(n))return;SH.add(n);if(inGame&&S&&S.round.status!=="lobby")drawGame()}
+function nextV(){const n=q.shift();if(n===undefined){busy=false;return}busy=true;let d=false;const fin=()=>{if(d)return;d=true;nextV()};const a=new Audio(n+".m4a");a.onplaying=()=>reveal(n);a.onended=a.onerror=fin;setTimeout(()=>reveal(n),900);setTimeout(fin,4500);a.play().catch(()=>{reveal(n);fin()})}
+function playNum(n){if(!snd||!touched){reveal(n);return}q.push(n);if(!busy)nextV()}
+function winSound(){stopVoice();try{const a=new Audio("bingo.m4a");a.play().catch(()=>{})}catch(e){}}
+function togSnd(){snd=!snd;if(!snd){stopVoice();if(S)S.called.forEach(x=>SH.add(x));drawGame()}$("sb").textContent=snd?"🔊":"🔇"}
+let warmed=0;function warm(){if(warmed)return;warmed=1;const c=navigator.connection;if(c&&(c.saveData||/(^|-)2g/.test(c.effectiveType||"")))return;let i=0;const step=()=>{if(i>75)return;const u=(i?i:"bingo")+".m4a";i++;fetch(u).catch(()=>{}).finally(()=>setTimeout(step,350))};setTimeout(step,2500)}
+document.addEventListener("click",()=>{touched=true;warm()});document.addEventListener("touchstart",()=>{touched=true;warm()},{passive:true});
+/* flow */
+async function boot(){for(let a=0;a<4;a++){try{const[me,st]=await Promise.all([api("/api/me"),api("/api/state")]);reg=me.registered;S=st;off=st.now-Date.now();goHome(me);return}catch(e){if(typeof e==="string"&&e!=="server_error"){$("hreg").textContent=ERR[e]||(e==="no_api"?"የWorker አድራሻ በindex.html ያስገቡ":e);return}$("hreg").textContent="እንደገና በመገናኘት ላይ…";await sleep(1500)}}$("hreg").innerHTML='መገናኘት አልተቻለም <button class="gb" onclick="boot()">⟳</button>'}
+async function goHome(me){inGame=false;show("home");try{me=me||await api("/api/me");reg=me.registered;$("hw").textContent=F(me.balance+me.bonus)+" ብር"}catch(e){}$("hreg").textContent=reg?"":"መጀመሪያ ይመዝገቡ፦ ቦቱን ከፍተው ስልክ ቁጥርዎን ያጋሩ";if(S)$("hs").textContent=S.round.stake}
+function play(){if(!reg){toast(ERR.not_registered);return}touched=true;inGame=true;key="";gkey="";if(S)render();if(!looping)loop();else tick()}
+function gap(){if(document.hidden)return 4000;const r=S.round,t=Date.now()+off;if(r.status==="lobby"){const l=r.start_ts+r.lobby_ms-t;return l<=0?600:Math.min(2000,l+300)}if(r.status==="running"){const nx=r.start_ts+r.lobby_ms+S.called.length*r.call_ms-t;return Math.max(500,Math.min(4000,nx+350))}return 1500}
+async function loop(){looping=true;while(inGame){await tick();await sleep(S?gap():1500)}looping=false}
+setInterval(()=>{if(inGame&&S&&S.round.status==="lobby"&&pend===0)drawLobby()},1000);
+async function tick(){if(pend>0)return;try{const s=await api("/api/state");if(pend>0)return;S=s;off=S.now-Date.now();if(inGame)render()}catch(e){if(e==="not_registered"||e==="unauthorized"){inGame=false;toast(ERR[e]);goHome()}}}
+function render(){const r=S.round;if(r.id!==rid){rid=r.id;lastN=S.called.length;key="";gkey="";stopVoice();SH=new Set(S.called)}if(r.status==="lobby"){$("win").classList.remove("on");show("lobby");drawLobby()}else{show("game");drawGame()}}
+const bi=()=>(S&&S.bround)||{locked:false,wins:[]};
+function drawLobby(){const r=S.round,left=Math.max(0,Math.ceil((r.start_ts+r.lobby_ms-(Date.now()+off))/1000));$("lt").textContent=left+"s";$("lm").textContent=F(S.balance);$("lp").textContent=F(S.bonus);$("ls").textContent=r.stake;$("lder").textContent=F(S.taken.length*r.stake*0.8);$("lpl").textContent=S.taken.length;
+const bw=bi().wins||[],k=JSON.stringify([S.taken,S.mine,bw]);if(k===key)return;key=k;const b=$("bnr");if(bw.length){b.innerHTML=bw.map(w=>"🎉 "+esc(w.name)+"! "+F(w.amount)+" ብር ቦነስ · ካርቴላ #"+w.cartela).join("<br>");b.style.display="block"}else{b.innerHTML="";b.style.display="none"}
+const gold=new Set(bw.map(w=>w.cartela)),M=new Set(S.mine),T=new Set(S.taken),cells=$("grid").children;for(let i=0;i<CARDS;i++){const n=i+1,c="n"+(gold.has(n)?" bn":M.has(n)?" mine":T.has(n)?" tk":"");if(cells[i].className!==c)cells[i].className=c}$("prev").innerHTML=S.mine.map(n=>`<div><div class="cn">ካርቴላ #${n}</div>${cardHTML(n,[])}</div>`).join("")}
+async function pick(n){if(S.taken.includes(n)&&!S.mine.includes(n))return;const had=S.mine.includes(n);if(had&&bi().locked){toast(ERR.locked);return}if(!had&&S.mine.length>=2){toast(ERR.max_cards);return}const bk=[S.mine.slice(),S.taken.slice()];
+if(had){S.mine=S.mine.filter(x=>x!==n);S.taken=S.taken.filter(x=>x!==n)}else{S.mine.push(n);S.taken.push(n)}key="";drawLobby();pend++;
+try{const s=await api(had?"/api/unpick":"/api/pick",{cartela:n});if(s.bonus_won)toast("🎉 "+F(s.bonus_won)+" ብር ቦነስ አሸንፈዋል!",1);if(pend===1){S=s;key="";render()}if(tg&&tg.HapticFeedback)tg.HapticFeedback.selectionChanged()}
+catch(e){if(e==="server_error"){try{const s2=await api("/api/state");if(s2.mine.includes(n)===!had){if(pend===1){S=s2;key="";render()}return}const s3=await api(had?"/api/unpick":"/api/pick",{cartela:n});if(pend===1){S=s3;key="";render()}return}catch(x){e=x}}if(pend===1){S.mine=bk[0];S.taken=bk[1];key="";drawLobby()}toast(ERR[e]||e)}finally{pend--;if(pend===0)tick()}}
+async function backHome(){inGame=false;if(bi().locked)toast("🔒 ካርቴላዎ ተቆልፏል");else for(const n of S.mine.slice()){try{await api("/api/unpick",{cartela:n})}catch(e){}}goHome()}
+function leaveGame(){inGame=false;$("win").classList.remove("on");goHome()}
+function buildGrid(){let h="";for(let i=1;i<=CARDS;i++)h+=`<div class="n" data-n="${i}">${i}</div>`;const g=$("grid");g.innerHTML=h;g.addEventListener("click",e=>{const t=e.target.closest(".n");if(t)pick(+t.dataset.n)})}
+function buildBoard(){let h="";for(let i=0;i<5;i++){h+=`<div class="hd" style="background:${CL[i]}">${"BINGO"[i]}</div>`;for(let k=1;k<=15;k++){const n=i*15+k;h+=`<div class="nn" id="b${n}">${n}</div>`}}$("board").innerHTML=h}
+function drawGame(){const r=S.round,all=S.called;$("gid").textContent=r.id;$("gp").textContent=S.taken.length||S.cards||0;$("gbet").textContent=r.stake;$("gd").textContent=F(S.derash);
+if(all.length>lastN){const run=r.status==="running",f=Math.max(lastN,all.length-3);for(let i=lastN;i<all.length;i++){if(run&&snd&&i>=f)playNum(all[i]);else SH.add(all[i])}lastN=all.length}
+const cl=all.filter(x=>SH.has(x)),n=cl[cl.length-1];$("gc").textContent=cl.length;const gk=r.id+"|"+cl.length+"|"+S.mine.join(",");
+if(gk!==gkey){gkey=gk;const bg=$("big");bg.textContent=n?Lt(n)+"-"+n:"—";if(n){bg.classList.remove("new");void bg.offsetWidth;bg.classList.add("new")}
+for(let i=1;i<=75;i++)$("b"+i).className="nn"+(i===n?" l":cl.includes(i)?" k":"");$("rec").innerHTML=cl.slice(-3).reverse().map(x=>`<span style="background:${CL[Math.floor((x-1)/15)]}">${Lt(x)}-${x}</span>`).join("");
+$("mycards").innerHTML=S.mine.length?S.mine.map(c=>`<div class="mc"><div class="cn">ካርቴላ #${c}</div>${cardHTML(c,cl,null,n)}</div>`).join(""):'<div style="text-align:center;padding:24px"><b style="font-size:19px">እየተመለከቱ ነው</b><p class="hint" style="margin-top:8px">ቀጣዩ ዙር በቅርቡ ይጀምራል።</p></div>'}
+const ab=$("act");$("sw").className="sw"+(S.auto?"":" off");
+if(!S.mine.length){ab.textContent="እየተመለከቱ ነው";ab.disabled=true;ab.className="gb"}else if(S.auto){ab.textContent="አውቶማቲክ";ab.disabled=true;ab.className="gb g"}else{ab.textContent="ቢንጎ!";ab.disabled=false;ab.className="gb r"}
+const ov=$("win");if(r.status==="ended"||r.status==="cancelled"){if(r.status==="ended"){if(endT.id!==r.id){endT.id=r.id;endT.t=Date.now()}if((busy||q.length)&&Date.now()-endT.t<8000)return;all.forEach(x=>SH.add(x))}
+const sec=Math.max(0,Math.ceil((r.rest_ms-(Date.now()+off-r.ended_ts))/1000));ov.classList.add("on");
+if(r.status==="ended"){const w=S.winners,me=w.some(x=>S.mine.includes(x.cartela));if(wonId!==r.id){wonId=r.id;winSound()}$("wb2").style.display="block";$("wt").textContent=me?"🎉 አሸንፈዋል!":"🏆 አሸናፊ";$("wn").textContent=w.map(x=>x.name).join(", ")+" · "+F(S.derash/(w.length||1))+" ብር";$("wc").innerHTML=w.length?`<div class="cn">ካርቴላ #${w[0].cartela}</div>`+cardHTML(w[0].cartela,all,winLine(mk(w[0].cartela),all)):""}
+else{$("wb2").style.display="none";$("wt").textContent="ዙሩ ተሰርዟል";$("wn").textContent="በቂ ተጫዋች የለም። ዋጋዎ ተመልሷል።";$("wc").innerHTML=""}$("ws").textContent="ቀጣይ ዙር በ"+sec+" ሰከንድ"}else ov.classList.remove("on")}
+async function toggleAuto(){const a=!S.auto;S.auto=a;drawGame();try{await api("/api/auto",{auto:a})}catch(e){S.auto=!a;drawGame();toast(ERR[e]||e)}}
+async function claim(){try{S=await api("/api/bingo",{});off=S.now-Date.now();render()}catch(e){toast(ERR[e]||e)}}
+/* tabs */
+function tabTo(i){inGame=false;$("win").classList.remove("on");document.querySelectorAll("#gnav div").forEach((d,k)=>d.classList.toggle("on",k===i));if(i===0){goHome();return}show("tab");$("tabc").innerHTML='<p class="hint">…</p>';i===1?rankPage("weekly"):walletPage("d")}
+let bank="cbe",wb="cbe";
+async function walletPage(t){try{const me=await api("/api/me");const dpt=t==="d";const L=dpt?Object.keys(BANKS).map(k=>`<div class="mth ${k===bank?"on":""}" onclick="bank='${k}';walletPage('d')"><i style="background:${BANKS[k][2]}">${BANKS[k][0][0]}</i><div style="flex:1"><b>${BANKS[k][0]} · ${HOLDER}</b><span>${BANKS[k][1]}</span></div><button class="gb g" onclick="event.stopPropagation();cp('${BANKS[k][1]}')">COPY</button></div>`).join(""):Object.keys(WD).map(k=>`<div class="mth ${k===wb?"on":""}" onclick="wb='${k}';walletPage('w')"><b>${WD[k]}</b></div>`).join("");
+$("tabc").innerHTML=`<div class="li"><span>ዋና ቦርሳ</span><span>${F(me.balance)} ብር</span></div><div class="li"><span>ቦነስ (ለጨዋታ)</span><span>${F(me.bonus)}</span></div><div class="row"><button class="gb ${dpt?"g":""}" style="flex:1" onclick="walletPage('d')">ገቢ አድርግ</button><button class="gb ${dpt?"":"g"}" style="flex:1" onclick="walletPage('w')">ወጪ አድርግ</button></div>${L}`+(dpt?`<input class="inp" id="fa1" type="number" inputmode="numeric" placeholder="መጠን (ቢያንስ 30 ብር)"><input class="inp" id="fa2" placeholder="የግብይት ቁጥር"><button class="gb g" onclick="dep()">ገቢውን አስገባ</button>`:`<input class="inp" id="fa2" placeholder="የሂሳብ ቁጥር / ስልክ"><input class="inp" id="fa1" type="number" inputmode="numeric" placeholder="መጠን (ቢያንስ 50 ብር)"><button class="gb g" onclick="wd()">ወጪ ጠይቅ</button>`)+me.withdrawals.map(x=>`<div class="li"><span>ወጪ ${F(x.amount)}</span><span>${x.status}</span></div>`).join("")}catch(e){toast(ERR[e]||e)}}
+async function dep(){try{const d=await api("/api/deposit",{amount:$("fa1").value,txid:$("fa2").value,method:bank});toast(d.status==="approved"?"✅ ገቢው ደርሷል":"✅ ተልኳል። ሲረጋገጥ ይጨመራል",1);walletPage("d")}catch(e){toast(ERR[e]||e)}}
+async function wd(){try{await api("/api/withdraw",{amount:$("fa1").value,account:$("fa2").value,method:wb});toast("✅ የወጪ ጥያቄ ተልኳል",1);walletPage("w")}catch(e){toast(ERR[e]||e)}}
+function cp(t){try{navigator.clipboard.writeText(t);toast("✅ ተቀድቷል "+t,1)}catch(e){toast(t)}}
+async function rankPage(p){try{const d=await api("/api/leaderboard?period="+p),tabs=`<div class="row"><button class="gb ${p==="weekly"?"g":""}" style="flex:1" onclick="rankPage('weekly')">ሳምንታዊ</button><button class="gb ${p==="daily"?"g":""}" style="flex:1" onclick="rankPage('daily')">ዕለታዊ</button></div>`,me=d.me||{};
+const rows=p==="weekly"?(d.top||[]).map(x=>`<div class="rk"><div class="no">${x.rank}</div><div class="in"><b>${esc(x.name)}</b><br><small>${esc(x.phone)} · ${x.games} ጨዋታ</small></div><b style="color:var(--gd)">${x.prize>0?F(x.prize)+" ብር":""}</b></div>`):(d.top||[]).map((r,i)=>`<div class="rk"><div class="no">${i+1}</div><div class="in"><b>${esc(r[0])}</b></div><small>${r[1]} ጨዋታ</small></div>`);
+$("tabc").innerHTML=tabs+`<div class="li"><span>የእኔ ደረጃ</span><span>${me.rank?"#"+me.rank:"—"} · ${me.played||0} ጨዋታ</span></div>`+(rows.join("")||'<p class="hint" style="padding:16px">ገና ማንም አልተጫወተም</p>')}catch(e){toast(ERR[e]||e)}}
+buildBoard();buildGrid();boot();
+</script></body></html>
