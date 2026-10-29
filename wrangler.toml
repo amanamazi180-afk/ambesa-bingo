@@ -5,7 +5,7 @@ compatibility_date = "2025-01-01"
 [[d1_databases]]
 binding = "DB"
 database_name = "ambesa-bingo"
-database_id = "PASTE-YOUR-DATABASE-ID-HERE"
+database_id = "84e0cb40-7d4b-4434-8ce2-67a3cae2f31d"
 
 [[durable_objects.bindings]]
 name = "HUB"
