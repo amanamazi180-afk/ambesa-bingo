@@ -63,7 +63,7 @@ body{font:15px system-ui,"Noto Sans Ethiopic",sans-serif;background:radial-gradi
 <div class="ov" id="win"><div style="font-size:54px">👑</div><div class="bgw" id="wb2">ቢንጎ!</div><h1 id="wt" style="font-size:28px;color:var(--gd)"></h1><p id="wn" style="margin:8px 0 14px;font-size:18px"></p><div id="wc" style="width:100%;max-width:320px"></div><p class="hint" id="ws" style="margin-top:12px"></p></div>
 <script>
 /* ===== ONLY THING TO EDIT: your Worker address ===== */
-const API=(new URLSearchParams(location.search).get("api")||"https://YOUR-WORKER.workers.dev").replace(/\/$/,"");
+const API=(new URLSearchParams(location.search).get("api")||"https://ambesa-bingo.belssedamanamanuelyismaw.workers.dev").replace(/\/$/,"");
 /* ==================================================== */
 if(API.indexOf("YOUR-")<0){const l=document.createElement("link");l.rel="preconnect";l.href=API;document.head.appendChild(l)}
 if("serviceWorker" in navigator)addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
