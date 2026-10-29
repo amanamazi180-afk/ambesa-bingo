@@ -19,4 +19,4 @@ new_sqlite_classes = ["GameHub"]
 GAME_URL = "https://amanamazi180-afk.github.io/ambesa-bingo/"
 ALLOW_ORIGIN = "https://amanamazi180-afk.github.io"
 STAKE = "10"
-BOT_USERNAME = "PASTE-YOUR-BOT-USERNAME-HERE"
+BOT_USERNAME = "Anbessabingo2bot"
