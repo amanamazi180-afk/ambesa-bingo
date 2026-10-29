@@ -88,9 +88,9 @@ function stopVoice(){q=[];busy=false}
 function reveal(n){if(SH.has(n))return;SH.add(n);if(inGame&&S&&S.round.status!=="lobby")drawGame()}
 function nextV(){const n=q.shift();if(n===undefined){busy=false;return}busy=true;let d=false;const fin=()=>{if(d)return;d=true;nextV()};const a=new Audio(n+".m4a");a.onplaying=()=>reveal(n);a.onended=a.onerror=fin;setTimeout(()=>reveal(n),900);setTimeout(fin,4500);a.play().catch(()=>{reveal(n);fin()})}
 function playNum(n){if(!snd||!touched){reveal(n);return}q.push(n);if(!busy)nextV()}
-function winSound(){stopVoice();try{const a=new Audio("bingo.m4a");a.play().catch(()=>{})}catch(e){}}
+function winSound(){stopVoice();try{const a=new Audio("Bingoo.m4a");a.play().catch(()=>{})}catch(e){}}
 function togSnd(){snd=!snd;if(!snd){stopVoice();if(S)S.called.forEach(x=>SH.add(x));drawGame()}$("sb").textContent=snd?"🔊":"🔇"}
-let warmed=0;function warm(){if(warmed)return;warmed=1;const c=navigator.connection;if(c&&(c.saveData||/(^|-)2g/.test(c.effectiveType||"")))return;let i=0;const step=()=>{if(i>75)return;const u=(i?i:"bingo")+".m4a";i++;fetch(u).catch(()=>{}).finally(()=>setTimeout(step,350))};setTimeout(step,2500)}
+let warmed=0;function warm(){if(warmed)return;warmed=1;const c=navigator.connection;if(c&&(c.saveData||/(^|-)2g/.test(c.effectiveType||"")))return;let i=0;const step=()=>{if(i>75)return;const u=(i?i:"Bingoo")+".m4a";i++;fetch(u).catch(()=>{}).finally(()=>setTimeout(step,350))};setTimeout(step,2500)}
 document.addEventListener("click",()=>{touched=true;warm()});document.addEventListener("touchstart",()=>{touched=true;warm()},{passive:true});
 /* flow */
 async function boot(){for(let a=0;a<4;a++){try{const[me,st]=await Promise.all([api("/api/me"),api("/api/state")]);reg=me.registered;S=st;off=st.now-Date.now();goHome(me);return}catch(e){if(typeof e==="string"&&e!=="server_error"){$("hreg").textContent=ERR[e]||(e==="no_api"?"የWorker አድራሻ በindex.html ያስገቡ":e);return}$("hreg").textContent="እንደገና በመገናኘት ላይ…";await sleep(1500)}}$("hreg").innerHTML='መገናኘት አልተቻለም <button class="gb" onclick="boot()">⟳</button>'}
