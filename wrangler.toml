@@ -1,0 +1,22 @@
+name = "ambesa-bingo"
+main = "worker.anbesa.js"
+compatibility_date = "2025-01-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "ambesa-bingo"
+database_id = "PASTE-YOUR-DATABASE-ID-HERE"
+
+[[durable_objects.bindings]]
+name = "HUB"
+class_name = "GameHub"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["GameHub"]
+
+[vars]
+GAME_URL = "https://amanamazi180-afk.github.io/ambesa-bingo/"
+ALLOW_ORIGIN = "https://amanamazi180-afk.github.io"
+STAKE = "10"
+BOT_USERNAME = "PASTE-YOUR-BOT-USERNAME-HERE"

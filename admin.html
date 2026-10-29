@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="am"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>አንበሳ Bingo · Admin</title><meta name="theme-color" content="#0c0805">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{--bg:#0c0805;--cd:#17100a;--ln:#33241a;--or:#f2b632;--tx:#f6ecdc;--mu:#a89880;--gr:#22c55e;--rd:#ef4444}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.4 system-ui,sans-serif;padding-bottom:40px}
+header{position:sticky;top:0;z-index:5;background:#0c0805f2;border-bottom:1px solid var(--ln);padding:10px 12px 0}
+h1{margin:0 0 8px;font-size:18px;color:var(--or)}
+nav{display:flex;gap:6px;overflow-x:auto;padding-bottom:10px;scrollbar-width:none}nav::-webkit-scrollbar{display:none}
+nav b{flex:0 0 auto;padding:8px 14px;border-radius:20px;background:var(--cd);border:1px solid var(--ln);color:var(--mu);font-weight:600;cursor:pointer}
+nav b.on{background:var(--or);color:#2a1a00;border-color:var(--or)}
+main{padding:12px;max-width:640px;margin:auto}
+.card{background:var(--cd);border:1px solid var(--ln);border-radius:14px;padding:12px;margin-bottom:12px}
+.card h3{margin:0 0 8px;font-size:15px;color:var(--or)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.st{background:#0f0a06;border:1px solid var(--ln);border-radius:10px;padding:8px 10px}.st small{color:var(--mu);display:block;font-size:12px}.st b{font-size:18px}
+input,select{width:100%;background:#0f0a06;color:var(--tx);border:1px solid var(--ln);border-radius:10px;padding:11px;font-size:15px;margin:4px 0}
+button{border:0;border-radius:10px;padding:10px 14px;font-weight:700;font-size:14px;background:var(--or);color:#2a1a00;cursor:pointer}
+button.g{background:var(--gr);color:#04150c}button.r{background:var(--rd);color:#fff}button.s{background:#2a1d12;color:var(--tx);border:1px solid var(--ln)}
+button:disabled{opacity:.5}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.row>*{flex:1}
+.mu{color:var(--mu);font-size:13px}.it{border-top:1px solid var(--ln);padding:10px 0}.it:first-child{border-top:0}
+.tag{display:inline-block;font-size:12px;padding:2px 8px;border-radius:8px;background:#2a1d12;color:var(--mu)}
+.ok{color:var(--gr)}.no{color:var(--rd)}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#000;border:1px solid var(--or);color:var(--tx);padding:10px 16px;border-radius:12px;display:none;z-index:9;max-width:90%}
+img.pv{max-width:100%;max-height:180px;border-radius:10px;display:block;margin:8px 0;border:1px solid var(--ln)}
+</style></head><body>
+<header><h1>🦁 አንበሳ Bingo · Admin</h1><nav id="nav"></nav></header>
+<main id="m"></main><div id="toast"></div>
+<script>
+/* ===== Worker address: same as in index.html (asked once, then remembered on this phone) ===== */
+let API="https://YOUR-WORKER.workers.dev";
+const tg=window.Telegram&&Telegram.WebApp;if(tg){try{tg.ready();tg.expand()}catch(e){}}
+const LS={get:k=>{try{return localStorage.getItem(k)}catch(e){return null}},set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}}};
+const qa=new URLSearchParams(location.search).get("api");if(qa)LS.set("api",qa);
+if(LS.get("api"))API=LS.get("api");
+const $=id=>document.getElementById(id),esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const BN={cbe:"CBE · ንግድ ባንክ",telebirr:"Telebirr · ቴሌብር",boa:"BOA · አቢሲኒያ",mpesa:"M-Pesa",ebirr:"E-birr"};
+function toast(t){const e=$("toast");e.textContent=t;e.style.display="block";clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display="none",2600)}
+async function api(p,body){
+  if(API.indexOf("YOUR-")>=0){const a=prompt("Worker address (https://….workers.dev):");if(!a)throw new Error("no api");API=a.trim().replace(/\/$/,"");LS.set("api",API)}
+  const h={"content-type":"application/json"};if(tg&&tg.initData)h["x-init-data"]=tg.initData;const k=LS.get("key");if(k)h["x-admin-key"]=k;
+  const r=await fetch(API+"/api/admin/"+p,{method:body===undefined?"GET":"POST",headers:h,body:body===undefined?undefined:JSON.stringify(body)});
+  if(r.status===403){const k2=prompt("Admin password (ADMIN_KEY):");if(k2){LS.set("key",k2.trim());return api(p,body)}throw new Error("forbidden")}
+  return r.json();
+}
+const act=async(p,b,ok)=>{try{const j=await api(p,b);if(j.error)toast("⚠️ "+j.error);else{toast(ok||"✅ ተጠናቋል")}return j}catch(e){toast("⚠️ "+e.message);return{error:1}}};
+const TABS=[["home","🏠 Home"],["pend","⏳ Pending"],["acc","🏦 Accounts"],["pl","👥 Players"],["bonus","🎁 Bonus"],["wk","🏆 Weekly"],["auto","🤖 Auto"],["log","📜 Log"]];
+let tab="home";
+function nav(){$("nav").innerHTML=TABS.map(t=>`<b class="${t[0]==tab?"on":""}" data-t="${t[0]}">${t[1]}</b>`).join("")}
+$("nav").onclick=e=>{const t=e.target.dataset.t;if(t){tab=t;show()}};
+async function show(){nav();$("m").innerHTML='<div class="mu">…</div>';try{await V[tab]()}catch(e){$("m").innerHTML='<div class="card no">⚠️ '+esc(e.message)+'<br><br><button onclick="show()">Retry</button></div>'}}
+const V={};
+V.home=async()=>{
+  const [o,g]=await Promise.all([api("overview"),api("game")]);if(o.error)throw new Error(o.error);
+  $("m").innerHTML=`<div class="card"><h3>📊 Overview</h3><div class="grid">
+  <div class="st"><small>Players</small><b>${o.players}</b></div><div class="st"><small>Held balances</small><b>${o.held}</b></div>
+  <div class="st"><small>Deposits today</small><b>${o.deposits_today}</b></div><div class="st"><small>Deposit count today</small><b>${o.deposits_today_count}</b></div>
+  <div class="st"><small>All deposits</small><b>${o.deposits}</b></div><div class="st"><small>All paid out</small><b>${o.withdrawals}</b></div>
+  <div class="st"><small>Pending</small><b>${o.pending}</b></div><div class="st"><small>Rounds played</small><b>${o.rounds}</b></div></div></div>
+  <div class="card"><h3>🎮 Game</h3><div class="mu">Round #${g.round} · <span class="tag">${g.status}</span> · ${g.players} players · ${g.cards} cartelas · stake ${g.stake}</div>
+  <div class="row" style="margin-top:8px"><input id="stk" type="number" value="${g.next_stake}" placeholder="Stake (birr)"><button id="sst">Set stake</button></div>
+  <div class="mu">The new stake starts from the next round.</div>
+  <div class="row" style="margin-top:8px"><button class="${g.paused?"g":"s"}" id="pz">${g.paused?"▶️ Resume new rounds":"⏸ Pause new rounds"}</button><button class="r" id="cn">Cancel round</button></div></div>`;
+  $("sst").onclick=async()=>{await act("set-stake",{stake:$("stk").value});show()};
+  $("pz").onclick=async()=>{await act("pause",{paused:!g.paused});show()};
+  $("cn").onclick=async()=>{if(confirm("Cancel this round and refund every stake?")){await act("game-stop",{});show()}};
+};
+V.pend=async()=>{
+  const j=await api("pending");if(j.error)throw new Error(j.error);
+  const li=j.items.map(x=>`<div class="it"><b>${x.type=="deposit"?"💰 Deposit":"💸 Withdraw"} #${x.id} · ${x.amount} birr</b><div>${esc(x.name)} · ${esc(x.phone)}</div><div class="mu">${esc(x.detail)}</div>
+  <div class="row" style="margin-top:6px">${x.type=="deposit"?(x.manual?`<button class="g" data-a="approve" data-t="deposit" data-i="${x.id}">✅ Approve</button>`:"")+(x.can_vet?`<button class="s" data-a="recheck" data-i="${x.id}">🔎 verify.et</button>`:"")+`<button class="r" data-a="reject" data-t="deposit" data-i="${x.id}">❌ Reject</button>`:`<button class="g" data-a="approve" data-t="withdraw" data-i="${x.id}">💸 Paid</button><button class="r" data-a="reject" data-t="withdraw" data-i="${x.id}">↩️ Reject</button>`}</div></div>`).join("")||'<div class="mu">Nothing is waiting ✅</div>';
+  const hs=j.history.map(x=>`<div class="it mu">${x.type=="deposit"?"💰":"💸"} ${x.amount} · ${esc(x.name)} · ${esc(x.detail)} · <span class="${x.status=="approved"||x.status=="paid"?"ok":"no"}">${x.status}</span></div>`).join("")||'<div class="mu">—</div>';
+  $("m").innerHTML=`<div class="card"><h3>⏳ Waiting</h3>${li}</div><div class="card"><h3>Last 24 hours</h3>${hs}</div>`;
+  $("m").onclick=async e=>{const d=e.target.dataset;if(!d.a)return;
+    if(d.a=="recheck"){const r=await act("recheck",{id:+d.i},"…");if(r.text)alert(r.text);show();return}
+    await act(d.a,{id:+d.i,type:d.t});show()};
+};
+/* ---------- ACCOUNTS: change the deposit accounts and their pictures ---------- */
+V.acc=async()=>{
+  const j=await api("accounts");if(j.error)throw new Error(j.error);const it=j.items||{};
+  $("m").innerHTML=Object.keys(it).map(k=>`<div class="card" data-b="${k}"><h3>🏦 ${esc(BN[k]||k)}</h3>
+  <small class="mu">Account / phone number</small><input class="no_" data-f="n" value="${esc(it[k].a)}" inputmode="numeric">
+  <small class="mu">Account holder name</small><input data-f="h" value="${esc(it[k].h)}">
+  <button data-s="${k}" style="width:100%">💾 Save account</button>
+  ${it[k].img?`<img class="pv" src="${esc(it[k].img)}">`:'<div class="mu" style="margin-top:8px">No picture yet</div>'}
+  <div class="row" style="margin-top:6px"><button class="s" data-u="${k}">📷 ${it[k].img?"Change":"Add"} picture</button>${it[k].img?`<button class="r" data-d="${k}">Remove</button>`:""}</div></div>`).join("")+'<input type="file" id="fi" accept="image/*" hidden><div class="mu">Players see this number, name and picture when they press “ገንዘብ አስገባ”.</div>';
+  const m=$("m"),fi=$("fi");let cur=null;
+  m.onclick=async e=>{const d=e.target.dataset,c=e.target.closest(".card");
+    if(d.s){const n=c.querySelector('[data-f="n"]').value.trim(),h=c.querySelector('[data-f="h"]').value.trim();const r=await act("set-account",{bank:d.s,number:n,name:h},"✅ Saved");if(!r.error)show()}
+    else if(d.u){cur=d.u;fi.value="";fi.click()}
+    else if(d.d){if(confirm("Remove the picture?")){await act("clear-account-image",{bank:d.d});show()}}};
+  fi.onchange=()=>{const f=fi.files[0];if(!f||!cur)return;const img=new Image(),u=URL.createObjectURL(f);
+    img.onload=async()=>{let w=img.width,h=img.height;const mx=700;if(Math.max(w,h)>mx){const s=mx/Math.max(w,h);w=Math.round(w*s);h=Math.round(h*s)}
+      const cv=document.createElement("canvas");cv.width=w;cv.height=h;const x=cv.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,w,h);x.drawImage(img,0,0,w,h);
+      let q=.85,d=cv.toDataURL("image/jpeg",q);while(d.length>380000&&q>.3){q-=.1;d=cv.toDataURL("image/jpeg",q)}
+      URL.revokeObjectURL(u);const r=await act("set-account-image",{bank:cur,data:d},"✅ Picture saved");if(!r.error)show()};img.src=u};
+};
+V.pl=async()=>{
+  $("m").innerHTML='<div class="card"><input id="q" placeholder="Search name / phone / id"><button id="go" style="width:100%">Search</button></div><div id="pl"></div>';
+  const load=async()=>{const j=await api("players?q="+encodeURIComponent($("q").value));
+    $("pl").innerHTML=(j.items||[]).map(p=>`<div class="card"><b>${esc(p.name)}</b> ${p.banned?'<span class="tag no">banned</span>':""}<div class="mu">${esc(p.phone)} · id ${p.id}</div><div style="font-size:18px;font-weight:700">${p.balance} birr</div>
+    <div class="row"><input type="number" placeholder="+50 / -50" data-a="${p.id}"><button data-ad="${p.id}">Adjust</button><button class="${p.banned?"g":"r"}" data-b="${p.id}" data-x="${p.banned?"unban":"ban"}">${p.banned?"Unban":"Ban"}</button></div></div>`).join("")||'<div class="mu">No players</div>'};
+  $("go").onclick=load;$("q").onkeydown=e=>{if(e.key=="Enter")load()};await load();
+  $("pl").onclick=async e=>{const d=e.target.dataset;
+    if(d.ad){const v=Number(e.target.parentNode.querySelector("input").value);if(!v)return toast("Type + or − amount");const r=await act("adjust",{id:+d.ad,amount:v});if(!r.error)load()}
+    else if(d.b){await act(d.x,{id:+d.b});load()}};
+};
+V.bonus=async()=>{
+  const j=await api("bonus");
+  $("m").innerHTML=`<div class="card"><h3>🎁 Secret bonus</h3>${j.on?`<div>Round #${j.round} · now #${j.current} (${j.status})</div>`+j.items.map(i=>`<div class="it">Cartela <b>#${i.c}</b> · ${i.amount} birr ${i.won?'· <span class="ok">won by '+esc(i.won)+"</span>":""}</div>`).join("")+'<button class="r" id="cl" style="width:100%;margin-top:8px">Turn off</button>':'<div class="mu">Off</div>'}</div>
+  <div class="card"><h3>Set bonus</h3><input id="bc" placeholder="Cartelas: 7, 12, 33   or   7=50, 12=100"><input id="ba" type="number" placeholder="Amount (birr) for cartelas without =amount"><input id="br" type="number" placeholder="Round number (empty = next)"><button id="bs" style="width:100%">Save bonus</button><div class="mu">The first player to take a bonus cartela wins the amount at once. Players never see which cartelas.</div></div>`;
+  $("bs").onclick=async()=>{await act("set-bonus",{cartelas:$("bc").value,amount:$("ba").value,round:$("br").value});show()};if($("cl"))$("cl").onclick=async()=>{await act("clear-bonus",{});show()};
+};
+V.wk=async()=>{
+  const j=await api("weekly"),rows=a=>a.map(x=>`<div class="it">#${x.rank} ${esc(x.name)} · ${x.games} games${x.prize?" · 🏆 "+x.prize+" birr":""}</div>`).join("")||'<div class="mu">—</div>';
+  $("m").innerHTML=`<div class="card"><h3>🏆 Weekly bonus</h3><div class="mu">${j.running?"RUNNING until "+new Date(j.ends_ts).toLocaleString():"Off"}</div>
+  ${j.running?'<button class="r" id="ws" style="width:100%;margin-top:8px">Stop now</button>':'<div class="row"><input id="wd" type="number" value="7"><button id="wb">Start (days)</button></div>'}</div>
+  <div class="card"><h3>Prizes (rank 1, 2, 3 …)</h3><input id="wp" value="${(j.prizes||[]).join(", ")}" placeholder="3000, 2000, 1000"><button id="wsv" style="width:100%">Save prizes</button></div>
+  <div class="card"><h3>${j.running?"Top players now":"Finished period"}</h3>${rows(j.running?j.this_week:j.last_week)}${!j.running&&j.last_week.length&&!j.last_paid?'<button class="g" id="wpay" style="width:100%;margin-top:8px">💰 Pay prizes</button>':""}${j.last_paid?'<div class="ok">Already paid ✅</div>':""}</div>`;
+  const R=async(p,b)=>{await act(p,b);show()};
+  if($("wb"))$("wb").onclick=()=>R("wk-start",{days:$("wd").value});if($("ws"))$("ws").onclick=()=>R("wk-stop",{});$("wsv").onclick=()=>R("set-prizes",{prizes:$("wp").value});
+  if($("wpay"))$("wpay").onclick=()=>{if(confirm("Pay the prizes now? This can be done only once."))R("pay-weekly",{})};
+};
+V.auto=async()=>{
+  const j=await api("autotake");
+  $("m").innerHTML=`<div class="card"><h3>🤖 Auto-take (support account)</h3><div class="mu">${j.on?"ON":"OFF"} · support: ${esc(j.support_name||j.support||"—")} · balance ${j.balance==null?"—":j.balance} · round #${j.round} (${j.status}) · taken ${j.taken}</div>
+  <input id="as" placeholder="Support Telegram id" value="${esc(j.support)}" inputmode="numeric"><input id="ac" type="number" placeholder="Cartelas per round (1-30)" value="${j.count||""}">
+  <div class="row"><button class="g" id="on">Turn ON</button><button class="r" id="off">Turn OFF</button></div></div>`;
+  $("on").onclick=async()=>{await act("set-autotake",{on:true,support:$("as").value,count:$("ac").value});show()};$("off").onclick=async()=>{await act("set-autotake",{on:false});show()};
+};
+V.log=async()=>{const j=await api("log");$("m").innerHTML='<div class="card"><h3>📜 Last actions</h3>'+(j.items||[]).map(x=>`<div class="it"><div class="mu">${new Date(x.ts).toLocaleString()} · ${esc(x.actor)}</div><b>${esc(x.action)}</b> ${esc(x.detail)}</div>`).join("")+"</div>"};
+show();
+</script></body></html>
