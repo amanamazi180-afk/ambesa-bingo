@@ -121,7 +121,7 @@ const say = async (env, chat, text, kb) => { // the Admin button is added only f
 const playKb = env => [[{ text: '🎮 ተጫወት', web_app: { url: env.GAME_URL } }]];
 
 /* ---------- bot menu (inline buttons, like DIL BINGO), bottom keyboard and Amharic texts ---------- */
-const SUPPORT = '@Amanbing2';
+const SUPPORT = '@Kidwda';
 const BTN = { play: '🎮 ጨዋታ ተጫወት', dep: '💰 ገንዘብ አስገባ', bal: '💳 ቀሪ ሂሳብ', sup: '🆘 እርዳታ' }; // old bottom-keyboard texts, still understood
 const BOT = { play: '🎮 ጨዋታ ተጫወት', dep: '💰 ገንዘብ አስገባ', bal: '💲 ቀሪ ሂሳብ' }; // the permanent keyboard under the chat box (Amharic)
 const LEG = { '🎮 Play Games': BOT.play, '💰 Deposit': BOT.dep, '💲 Check Balance': BOT.bal }; // the OLD English keyboard texts: players who still have that keyboard keep working
