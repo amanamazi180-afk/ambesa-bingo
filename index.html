@@ -68,7 +68,7 @@ const API=(new URLSearchParams(location.search).get("api")||"https://ambesa-bing
 if(API.indexOf("YOUR-")<0){const l=document.createElement("link");l.rel="preconnect";l.href=API;document.head.appendChild(l)}
 if("serviceWorker" in navigator)addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
 const tg=window.Telegram&&Telegram.WebApp;if(tg){tg.ready();tg.expand();try{tg.setHeaderColor("#0c0805");tg.setBackgroundColor("#0c0805")}catch(e){}}
-const $=i=>document.getElementById(i),CL=["#e11d48","#f97316","#d99a00","#2dbe6c","#0ea5e9"],CARDS=400;
+const $=i=>document.getElementById(i),CL=["#e11d48","#f97316","#d99a00","#2dbe6c","#0ea5e9"],CARDS=600;
 /* deposit accounts: the real ones come from the server every time the wallet opens (Admin > Accounts); ACC0 is only a fallback */
 const LBL={cbe:"CBE",telebirr:"Telebirr",mpesa:"M-Pesa",ebirr:"E-birr",boa:"BOA"},COL={cbe:"#7b2a7e",telebirr:"#0a8fd8",mpesa:"#1f9d3a",ebirr:"#1f9d3a",boa:"#b8901f"};
 const ACC0={cbe:{a:"0982535736",h:"kidus"},telebirr:{a:"0900060528",h:"kidus"},mpesa:{a:"0722251380",h:"likinaw"},ebirr:{a:"0982535736",h:"kidus"}};
