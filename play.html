@@ -1,0 +1,11 @@
+<!doctype html><html lang="am"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>አንበሳ Bingo</title>
+<style>html,body{margin:0;height:100%;background:#0c0805;color:#b39b7a;font:15px system-ui,sans-serif}body{display:flex;align-items:center;justify-content:center}</style></head>
+<body>…
+<script>
+/* Opens your bingo page (bingo.html) unchanged, only the Wallet tab is sent to the one shared deposit wallet (aviator.html#wallet). */
+fetch("bingo.html",{cache:"no-store"}).then(function(r){return r.text()}).then(function(t){
+  var inj='<script>(function(){var o=window.tabTo;window.tabTo=function(i){if(i===2){location.href="aviator.html#wallet";return}o(i)}})()<\/script><script src="topbar.js"><\/script>';
+  var k=t.lastIndexOf("</body>");t=k<0?t+inj:t.slice(0,k)+inj+t.slice(k);
+  document.open();document.write(t);document.close();
+}).catch(function(){location.replace("bingo.html")});
+</script></body></html>

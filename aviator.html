@@ -364,7 +364,7 @@ function loop(now){
    if(ch)renderList()}}
  draw(now);requestAnimationFrame(loop)}
 for(var hi=0;hi<40;hi++)hist.push(Math.min(4000,Math.max(1,Math.floor(97/(1-Math.random()))/100)));
-[0,1].forEach(buildPanel);drawHist();fit();setBal();phase='wait';tick();requestAnimationFrame(loop);if(location.hash=='#wallet')setTimeout(function(){wOpen('dep')},400);try{if(tg&&tg.BackButton){tg.BackButton.show();tg.BackButton.onClick(function(){if(wl.style.display=='block'){wl.style.display='none'}else location.href='index.html'})}}catch(e){}
+[0,1].forEach(buildPanel);drawHist();fit();setBal();phase='wait';tick();requestAnimationFrame(loop);if(location.hash=='#wallet')setTimeout(function(){wOpen('dep')},400);try{if(tg&&tg.BackButton){tg.BackButton.show();var fromW=location.hash=='#wallet';tg.BackButton.onClick(function(){if(fromW&&history.length>1){history.back()}else if(wl.style.display=='block'){wl.style.display='none'}else location.href='index.html'})}}catch(e){}
 $('.dots').onclick=function(){$('#hg').innerHTML=hist.slice(0,48).map(function(m){return '<span class="'+cls(m)+'">'+m.toFixed(2)+'x</span>'}).join('');$('#hp').style.display='block'};$('#hx').onclick=function(){$('#hp').style.display='none'};
 /* ===== Telegram mini-app hooks ===== */
 try{if(tg){if(tg.disableVerticalSwipes)tg.disableVerticalSwipes();if(tg.setBackgroundColor)tg.setBackgroundColor('#0d0d0e')}}catch(e){}
@@ -599,4 +599,5 @@ function musOffFn(){engStop();musOn=false;clearInterval(mTimer);$('#mus').style.
 $('#mus').onclick=function(e){e.stopPropagation();if(musOn){userOff=true;musOffFn()}else{userOff=false;musOnFn()}};
 ['click','touchend'].forEach(function(ev){document.addEventListener(ev,function(e){if(e.target&&e.target.id=='mus')return;if(!musOn&&!userOff)musOnFn();else if(AC&&AC.state=='suspended')AC.resume()},false)});
 })();
-</script></body></html>
+</script><script src="topbar.js"></script>
+</body></html>
