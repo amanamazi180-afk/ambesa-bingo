@@ -1,6 +1,6 @@
 // aviator-worker.js - Aviator game server for the Ambesa Worker. Uses the SAME wallet (users.balance, in cents) as the bingo.
 // Needs only 2 edits in worker.anbesa.js (see the instructions). Tables are created automatically. Deposits use the bot's existing system.
-const C = { edge: 0.04, max: 4000, betMs: 6000, coolMs: 4000, minBet: 5, maxBet: 4000, maxWinC: 10000000 }; // max single win = 100,000 birr
+const C = { edge: 0.04, max: 4000, betMs: 6000, coolMs: 4000, minBet: 1, maxBet: 4000, maxWinC: 10000000 }; // max single win = 100,000 birr
 const J = (d, s = 200) => new Response(JSON.stringify(d), { status: s, headers: { 'content-type': 'application/json' } });
 const r2 = n => Math.floor(n * 100 + 1e-9) / 100;
 const mult = ms => { const t = ms / 1000; return Math.max(1, r2(Math.exp(0.1 * t * (1 + 0.012 * t)))); }; // same curve as the page
@@ -50,10 +50,10 @@ export async function avRoute(req, env, p, u, b) { // u = the logged-in, registe
     return J({ round: r.id, phase, now, start_ms: r.start_ms, crash: phase === 'crashed' ? r.crash : null, history: hist, mine, balance: B(await bal()) });
   }
   if (p === '/api/av/bet') { // {slot, amount (birr), auto}
-    const a = Math.floor(Number(b.amount)), auto = Number(b.auto) > 1 ? Math.min(C.max, Math.max(1.01, Number(b.auto))) : null;
+    const a = Math.round(Number(b.amount) * 100) / 100, auto = Number(b.auto) > 1 ? Math.min(C.max, Math.max(1.01, Number(b.auto))) : null;
     if (!(a >= C.minBet && a <= C.maxBet)) return J({ error: `Bet ${C.minBet} - ${C.maxBet} ETB` }, 400);
     const r = await round(db, now); if (now >= r.start_ms) return J({ error: 'Betting closed, wait for the next round' }, 400);
-    const c = a * 100;
+    const c = Math.round(a * 100);
     if ((await db.prepare('UPDATE users SET balance=balance-?1 WHERE id=?2 AND balance>=?1').bind(c, u.id).run()).meta.changes !== 1) return J({ error: 'Not enough balance' }, 400);
     try { await db.prepare('INSERT INTO av_bets(round_id,user_id,slot,amount,auto_at) VALUES(?,?,?,?,?)').bind(r.id, u.id, slot, c, auto).run(); }
     catch (e) { await db.prepare('UPDATE users SET balance=balance+? WHERE id=?').bind(c, u.id).run(); return J({ error: 'You already bet on this panel' }, 400); }

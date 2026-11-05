@@ -2,10 +2,12 @@
 (function () {
   if (window.__tb) return; window.__tb = 1;
   var API = (new URLSearchParams(location.search).get('api') || 'https://ambesa-bingo.belssedamanamanuelyismaw.workers.dev').replace(/\/$/, '');
-  var tg = window.Telegram && Telegram.WebApp, flow = !!document.querySelector('.host'), bal = null, show = false;
+  var tg = window.Telegram && Telegram.WebApp;
+  try { if (tg) { tg.ready(); tg.expand(); if (tg.requestFullscreen && !tg.isFullscreen) tg.requestFullscreen(); if (tg.disableVerticalSwipes) tg.disableVerticalSwipes(); } } catch (e) { } // full screen
+  var flow = !!document.querySelector('.host'), bal = null, show = false;
   try { show = localStorage.getItem('tb_show') === '1'; } catch (e) { }
-  var css = '#tb{display:flex;align-items:center;gap:8px;box-sizing:border-box;height:52px;padding:6px 10px;background:#0c0805;border-bottom:1px solid #3b2a17;font:700 14px system-ui,sans-serif;color:#fbf3e4}' +
-    (flow ? '.host{display:none!important}' : '#tb{position:fixed;top:0;left:0;right:0;z-index:8}.s{top:52px!important}') +
+  var css = ':root{--ti:calc(var(--tg-safe-area-inset-top,0px) + var(--tg-content-safe-area-inset-top,0px))}#tb{display:flex;align-items:center;gap:8px;box-sizing:border-box;height:calc(52px + var(--ti));padding:calc(6px + var(--ti)) 10px 6px;background:#0c0805;border-bottom:1px solid #3b2a17;font:700 14px system-ui,sans-serif;color:#fbf3e4}' +
+    (flow ? '.host{display:none!important}' : '#tb{position:fixed;top:0;left:0;right:0;z-index:8}.s{top:calc(52px + var(--ti))!important}') +
     '#tb .lg{font:900 15px system-ui;background:linear-gradient(90deg,#ffe08a,#f2b632,#f97316);-webkit-background-clip:text;color:transparent;flex:none}' +
     '#tb .bl{flex:1;min-width:0;display:flex;align-items:center;gap:6px;background:#17100a;border:1px solid #3b2a17;border-radius:22px;padding:7px 12px;color:#f2b632;font-weight:800}' +
     '#tb .bl span{flex:1;white-space:nowrap;overflow:hidden}#tb button{border:0;background:none;color:#b39b7a;font-size:17px;padding:0 2px;cursor:pointer}' +

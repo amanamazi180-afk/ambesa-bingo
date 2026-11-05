@@ -244,7 +244,7 @@ function crash(){phase='crash';crashT=performance.now();musStop();crashSfx();doc
  panels.forEach(function(p,i){if(p.state=='in'){mine.push({b:p.stake,x:0,w:0});p.state='lost';renderList()}btn(i)})}
 var cv=$('#cv'),ctx=cv.getContext('2d'),W=0,H=0;
 function size(){var r=cv.getBoundingClientRect(),d=Math.min(2,window.devicePixelRatio||1);W=cv.width=r.width*d;H=cv.height=r.height*d}
-function fit(){var z=Math.min(window.innerWidth/520,2.2);document.body.style.zoom=z;document.body.style.width=(window.innerWidth/z)+'px';size()}window.addEventListener('resize',fit);
+function fit(){var z=Math.min(window.innerWidth/440,2.2);document.body.style.zoom=z;document.body.style.width=(window.innerWidth/z)+'px';size()}window.addEventListener('resize',fit);
 function plane(x,y,s,ang,t){ctx.save();ctx.translate(x,y);ctx.rotate(ang);ctx.scale(s,s*(.9+.1*Math.cos(t/450)));
  var RED='#ff2020';ctx.lineJoin='round';ctx.lineCap='round';
  function ln(pts,close,w){ctx.beginPath();ctx.moveTo(pts[0][0],pts[0][1]);for(var i=1;i<pts.length;i++)ctx.lineTo(pts[i][0],pts[i][1]);if(close)ctx.closePath();ctx.lineWidth=(w||2)*2.4;ctx.stroke()}
