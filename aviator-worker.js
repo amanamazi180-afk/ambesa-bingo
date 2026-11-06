@@ -1,6 +1,6 @@
 // aviator-worker.js - Aviator game server for the Ambesa Worker. Uses the SAME wallet (users.balance, in cents) as the bingo.
 // Needs only 2 edits in worker.anbesa.js (see the instructions). Tables are created automatically. Deposits use the bot's existing system.
-const C = { edge: 0.04, max: 4000, betMs: 6000, coolMs: 4000, minBet: 1, maxBet: 4000, maxWinC: 10000000 }; // max single win = 100,000 birr
+const C = { edge: 0.04, max: 4000, betMs: 6000, coolMs: 4000, minBet: 4, maxBet: 4000, maxWinC: 10000000 }; // max single win = 100,000 birr
 const J = (d, s = 200) => new Response(JSON.stringify(d), { status: s, headers: { 'content-type': 'application/json' } });
 const r2 = n => Math.floor(n * 100 + 1e-9) / 100;
 const mult = ms => { const t = ms / 1000; return Math.max(1, r2(Math.exp(0.1 * t * (1 + 0.012 * t)))); }; // same curve as the page
